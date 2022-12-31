@@ -19,7 +19,7 @@ bool buttonState = HIGH;  // variable to store the button state
 //const int msglen = sizeof(msg)/sizeof(msg[0]);
 
 char msg = '1';
-const int msglen = 1;
+//const int msglen = 1;
 
 void setup()
 {
@@ -46,7 +46,7 @@ void loop()
   {
     //msg[0] = count;
     digitalWrite(ledPin, HIGH); // Flash a light to show transmitting
-    vw_send((uint8_t *)msg, msglen);
+    vw_send((uint8_t *)msg, strlen(msg));
     vw_wait_tx(); // Wait until the whole message is gone
     digitalWrite(ledPin, LOW);
     //count = count + 1;
