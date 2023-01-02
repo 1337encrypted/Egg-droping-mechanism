@@ -44,7 +44,7 @@ class tb6612fng
     inline void standby() __attribute__((always_inline));                      //set the chip to standby mode.
 };
 
-tb6612fng::tb6612fng(int IN1, int IN2, int PWM, int STDBY)
+tb6612fng::tb6612fng(uint8_t IN1, uint8_t IN2, uint8_t PWM, uint8_t STDBY)
 {
     this->IN1 = IN1;
     this->IN2 = IN2;

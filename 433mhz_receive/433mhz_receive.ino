@@ -18,24 +18,22 @@ void setup()
     
     vw_rx_start();                  // Start the receiver PLL running
 
-    pinMode(ledPin, OUTPUT);
-    digitalWrite(ledPin, LOW);
+    led.blink(2);
 
     //Encoder 
     attachInterrupt(digitalPinToInterrupt(pinA), incrementEncoder, RISING);
     attachInterrupt(digitalPinToInterrupt(pinA), decrementEncoder, FALLING);
-    encoder::previousMillis = millis();
+    encoder.previousMillis = millis();
 }
 void loop()
 {    
     if (vw_get_message(buf, &buflen)) // Non-blocking
     {
-      if(buf[0] == 'Q')
+      if(buf[0] == 'U')
       {
         led.on();                              // Flash a light to show received good message
         motorStatus = motorStates::ROTATEUP;
         led.off();
-        break;
       }
     }
 
@@ -43,10 +41,11 @@ void loop()
     {
       case motorStates::READCHANNEL:
       IBus.loop();
-      CH4 = IBus.readSwitch(4);
+      CH4Value = IBus.readSwitch(4);
+      debugln(CH4Value);
       //CH6 = IBus.readSwitch(6);
       
-      if(CH4 >= 1600)
+      if(CH4Value == true)
       {
         motorStatus = motorStates::ROTATEDOWN;
         break;

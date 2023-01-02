@@ -2,31 +2,14 @@
 
 // INCLUDES
 #include <VirtualWire.h>
-
-const byte receivePin = 2;
-const byte transmitEnPin = 3;
-//const byte bitsPerSec = 2000; //Transmittion rate
-
-//Actual connections
-const byte transmitPin = 12;
-const byte ledPin = 13;
-const byte buttonPin = 4;  // pin number for the pushbutton
-bool buttonState = HIGH;  // variable to store the button state
-
-//For long array transmittion
-//byte count = 1;
-//char msg[0] = {'1'};
-//const int msglen = sizeof(msg)/sizeof(msg[0]);
-
-char msg = '1';
-//const int msglen = 1;
+#include "GLOBALS.h"
 
 void setup()
 {
     #ifdef DEBUG
       //Serial connection used for debugging only
       Serial.begin(9600);
-      Serial.println(F("setup"));
+      debugln(F("setup"));
     #endif
     
     // Initialise the IO and ISR
@@ -35,21 +18,46 @@ void setup()
     vw_set_ptt_pin(transmitEnPin);
     vw_set_ptt_inverted(true); // Required for DR3100
     vw_setup(2000);       // Bits per sec
-    pinMode(ledPin, OUTPUT);
-    pinMode(buttonPin, INPUT_PULLUP); // initialize the button pin as an input:
+    pinMode(buttonPin, INPUT_PULLUP); // initialize the button pin as an input
+    // pinMode(buttonPin, INPUT); // initialize the button pin as an input
+
+    //UNO/Nano
+    // INT 0 = Pin2
+    // INT 1 = Pin3
+
+    //Attiny85
+    //INT 0 = PB2 || Pin7(hardware)
+    attachInterrupt(0, sendUp, FALLING);
 }
 
 void loop()
 {
-  buttonState = digitalRead(buttonPin);         // read the button state:
-  if (buttonState == LOW) 
+  // debugln(digitalRead(buttonPin));
+  switch(txStatus)
   {
-    //msg[0] = count;
-    digitalWrite(ledPin, HIGH); // Flash a light to show transmitting
-    vw_send((uint8_t *)msg, strlen(msg));
+    case states::SENDNTHG:
+    //nothing
+    debugln("NOTHING");
+    break;
+
+    case states::SENDDOWN:
+    vw_send((uint8_t *)msgDown, msgLen);
     vw_wait_tx(); // Wait until the whole message is gone
-    digitalWrite(ledPin, LOW);
-    //count = count + 1;
+    led.on();
+    debugln("DOWN");
+    break;
+
+    case states::SENDUP:
+    vw_send((uint8_t *)msgUp, msgLen);
+    vw_wait_tx(); // Wait until the whole message is gone
+    led.off();
+    debugln("UP");
+    txStatus = states::SENDNTHG;
+    break;
   }
-  delay(10);
+}
+
+void sendUp()
+{
+    txStatus = states::SENDUP;
 }

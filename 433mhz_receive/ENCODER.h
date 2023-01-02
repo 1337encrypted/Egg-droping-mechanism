@@ -10,7 +10,7 @@ private:
   uint8_t pinB;
 
 public:
-  constexpr uint8_t ENC_COUNT_REV = 3;
+  static constexpr uint8_t ENC_COUNT_REV = 3;
   long previousMillis = 0;
   long currentMillis = 0;
   int rpm;
@@ -28,17 +28,11 @@ Encoder::Encoder(int pinA = -1, int pinB = -1)
 }
 
 // Method to initialize the encoder:
-void Encoder::begin() {
+void Encoder::begin() 
+{
   pinMode(this->pinA, INPUT_PULLUP);
 
   if(pinB != -1)
     pinMode(this->pinB, INPUT_PULLUP);
-
-  this->position = 0;
-  this->state = 0;
-  this->lastA = digitalRead(this->pinA);
-
-  if(pinB != -1)
-    this->lastB = digitalRead(this->pinB);
 }
 #endif  // ENCODER_H

@@ -1,6 +1,8 @@
+#include "CONFIG.h"
 #include "tb6612fng.h"
 #include "ENCODER.h"
-#include "CONFIG.h"
+#include "FlySkyIBus.h"
+#include "LED.h"
 
 //virtual Wire pins
 constexpr byte transmitPin = 12;
@@ -14,10 +16,10 @@ constexpr byte ledPin = 13;
 LED led(ledPin);
 
 //motor pins
-constexpr byte IN1 = A0
-constexpr byte IN2 = A1
-constexpr byte PWM = 5
-constexpr byte STDBY = A2
+constexpr byte IN1 = A0;
+constexpr byte IN2 = A1;
+constexpr byte PWM = 5;
+constexpr byte STDBY = A2;
 
 //Create motor object
 tb6612fng motor(IN1,IN2,PWM,STDBY);
@@ -33,7 +35,10 @@ Encoder encoder(pinA);
 
 //Transmitter channel read
 constexpr byte CH4 = 6;
-constexpr byte CH4 = 9;
+bool CH4Value = false;
+
+//Flysky object
+FlySkyIBus IBus;
 
 
 enum class motorStates : byte
@@ -41,7 +46,8 @@ enum class motorStates : byte
   READCHANNEL,
   ROTATEUP,
   ROTATEDOWN,
-  STOP
+  STOP,
+  PASS
 };
 motorStates motorStatus = motorStates::READCHANNEL;
 
