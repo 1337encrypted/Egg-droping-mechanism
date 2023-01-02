@@ -27,20 +27,20 @@ void setup()
 
     //Attiny85
     //INT 0 = PB2 || Pin7(hardware)
-    attachInterrupt(0, sendUp, FALLING);
+    attachInterrupt(digitalPinToInterrupt(buttonPin), isr, CHANGE);
+    led.on();
+    buzz.initBuzzer();
+    led.off();
 }
 
 void loop()
 {
-  // debugln(digitalRead(buttonPin));
+  
+  debugln(buttonState);
+  
   switch(txStatus)
   {
-    case states::SENDNTHG:
-    //nothing
-    debugln("NOTHING");
-    break;
-
-    case states::SENDDOWN:
+    case states::SENDDOWN:    
     vw_send((uint8_t *)msgDown, msgLen);
     vw_wait_tx(); // Wait until the whole message is gone
     led.on();
@@ -52,12 +52,12 @@ void loop()
     vw_wait_tx(); // Wait until the whole message is gone
     led.off();
     debugln("UP");
-    txStatus = states::SENDNTHG;
     break;
   }
 }
 
-void sendUp()
+void isr()
 {
-    txStatus = states::SENDUP;
+  buttonState=digitalRead(buttonPin);
+  buttonState == LOW ? txStatus = states::SENDDOWN : txStatus = states::SENDUP;
 }

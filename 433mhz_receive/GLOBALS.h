@@ -1,13 +1,15 @@
 #include "CONFIG.h"
 #include "tb6612fng.h"
 #include "ENCODER.h"
-#include "FlySkyIBus.h"
+#include "FlySky.h"
 #include "LED.h"
+#include "limitSwitch.h"
 
 //virtual Wire pins
 constexpr byte transmitPin = 12;
 constexpr byte receivePin = 11;
-constexpr byte transmitEnPin = 3;
+//constexpr byte transmitEnPin = 3;
+constexpr byte transmitEnPin = 10;
 //const byte bitsPerSec = 2000; //Transmittion rate
 
 //Led pin
@@ -33,23 +35,26 @@ volatile long encoderValue=0;
 Encoder encoder(pinA);
 
 
-//Transmitter channel read
-constexpr byte CH4 = 6;
-bool CH4Value = false;
+//Transmitter channel read and object
+constexpr uint8_t CH5Pin = 6;
+//constexpr uint8_t CH6Pin = 9;
 
-//Flysky object
-FlySkyIBus IBus;
+FlySky CH5(CH5Pin);
+//FlySky CH6(CH6Pin);
 
+
+//LimitSwitch and object
+constexpr uint8_t limitSwitchPin = 7;
+limitSwitch limitSwitchObj(limitSwitchPin);
 
 enum class motorStates : byte
 {
-  READCHANNEL,
+  PASS,
   ROTATEUP,
   ROTATEDOWN,
-  STOP,
-  PASS
+  STOP
 };
-motorStates motorStatus = motorStates::READCHANNEL;
+motorStates motorStatus = motorStates::PASS;
 
 
 //

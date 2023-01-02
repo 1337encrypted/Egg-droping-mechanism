@@ -5,7 +5,6 @@ void setup()
 {
     delay(1000);
     Serial.begin(115200);
-    IBus.begin(Serial);
     
     Serial.println("setup");
     
@@ -27,49 +26,71 @@ void setup()
 }
 void loop()
 {    
-    if (vw_get_message(buf, &buflen)) // Non-blocking
-    {
-      if(buf[0] == 'U')
-      {
-        led.on();                              // Flash a light to show received good message
-        motorStatus = motorStates::ROTATEUP;
-        led.off();
-      }
-    }
-
     switch(motorStatus)
-    {
-      case motorStates::READCHANNEL:
-      IBus.loop();
-      CH4Value = IBus.readSwitch(4);
-      debugln(CH4Value);
-      //CH6 = IBus.readSwitch(6);
+    {      
+      case motorStates::PASS:
+      debugln("Pass");
       
-      if(CH4Value == true)
+      if (vw_get_message(buf, &buflen)) // Non-blocking
       {
-        motorStatus = motorStates::ROTATEDOWN;
-        break;
+        if(buf[0] == 'D' && CH5.readSwitch() == true)
+        {
+          led.on();                              // Flash a light to show received good message
+          motorStatus = motorStates::ROTATEDOWN;
+          led.off();
+        }
       }
       break;
       
       case motorStates::ROTATEDOWN:
       motor.front();
       debugln("Motor down");
+      
+      if (vw_get_message(buf, &buflen)) // Non-blocking
+      {
+        if(buf[0] == 'U' || (buf[0] == 'D' && CH5.readSwitch() == false))
+        {
+          led.on();                              // Flash a light to show received good message
+          motorStatus = motorStates::ROTATEUP;
+          led.off();
+        }
+      }
+      
       break;
 
       case motorStates::ROTATEUP:
       motor.back();
       debugln("Motor up");
+
+      if (vw_get_message(buf, &buflen)) // Non-blocking
+      {
+        if(buf[0] == 'D' && CH5.readSwitch() == true)
+        {
+          led.on();                              // Flash a light to show received good message
+          motorStatus = motorStates::ROTATEDOWN;
+          led.off();
+        }
+      }
+      
+      if (limitSwitch.limitSwitchRead() == 0)
+      {
+          led.on();                              // Flash a light to show received good message
+          motorStatus = motorStates::STOP;
+          led.off();
+      }
+      
       break;
 
       case motorStates::STOP:
       motor.brake();
       debugln("Motor stop");
-      motorStatus = motorStates::PASS;
-      break;
 
-      case motorStates::PASS:
-      //Do nothing
+      if(CH5.readSwitch() == false)
+      {
+        led.on();
+        motorStatus = motorStates::PASS;
+        led.off();
+      }
       break;
     }
 }
