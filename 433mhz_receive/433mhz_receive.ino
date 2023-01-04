@@ -17,12 +17,14 @@ void setup()
     
     vw_rx_start();                  // Start the receiver PLL running
 
-    led.blink(2);
-
     //Encoder 
     attachInterrupt(digitalPinToInterrupt(pinA), incrementEncoder, RISING);
     attachInterrupt(digitalPinToInterrupt(pinA), decrementEncoder, FALLING);
     encoder.previousMillis = millis();
+
+    buzz.alarm();
+    led.blink(2);
+    buzz.off();
 }
 void loop()
 {    
@@ -72,7 +74,7 @@ void loop()
         }
       }
       
-      if (limitSwitch.limitSwitchRead() == 0)
+      if (limitSwitchObj.limitSwitchRead() == 0)
       {
           led.on();                              // Flash a light to show received good message
           motorStatus = motorStates::STOP;
