@@ -36,7 +36,7 @@ class tb6612fng
     public:
     volatile uint8_t speed;
 
-    tb6612fng(uint8_t=-1, uint8_t=-1, uint8_t=-1, uint8_t=-1); // Default values set to -1
+    tb6612fng(uint8_t, uint8_t, uint8_t, uint8_t); // Default values set to -1
     inline void enable() __attribute__((always_inline));                       //The enable function takes it out of standby
     inline void front() __attribute__((always_inline));
     inline void back() __attribute__((always_inline));
@@ -89,8 +89,8 @@ void tb6612fng::back()
 
 void tb6612fng::brake()
 {
-   digitalWrite(this->IN1, HIGH);
-   digitalWrite(this->IN2, HIGH);
+   digitalWrite(this->IN1, LOW);
+   digitalWrite(this->IN2, LOW);
    analogWrite(this->PWM,0);
 }
 
