@@ -3,7 +3,7 @@
 
 void setup()
 {
-    delay(500);
+    delay(200);
     Serial.begin(115200);
     IBus.begin(Serial);
     
@@ -19,8 +19,8 @@ void setup()
     vw_rx_start();                  // Start the receiver PLL running
 
     //Encoder 
-//    attachInterrupt(digitalPinToInterrupt(pinA), incrementEncoder, RISING);
-//    attachInterrupt(digitalPinToInterrupt(pinA), decrementEncoder, FALLING);
+    attachInterrupt(digitalPinToInterrupt(pinA), encoderInterrupt, RISING);
+//    attachInterrupt(digitalPinToInterrupt(pinB), decrementEncoder, RISING);
 //    encoder.previousMillis = millis();
 
     buzz.alarm();
@@ -32,8 +32,16 @@ void loop()
     IBus.loop();
 
     CH5Val = IBus.readSwitch(4);
-    CH6Speed = IBus.readChannel(2);
+    motor.speed = (IBus.readChannel(2)-1000)*0.255;
     CH7Kill = IBus.readSwitch(5);
+
+//    Serial.print(motor.speed);
+//    Serial.print(" : ");
+    if(encoderCount < 0)
+    {
+      prevStatus = motorStates::PASS;
+      motorStatus = motorStates::STOP;
+    }
 
     switch(motorStatus)
     {      
@@ -54,6 +62,15 @@ void loop()
           led.off();
         }
       }
+//      else if (vw_get_message(buf, &buflen)) // Non-blocking
+//      {
+//        if(CH5Val == 1)
+//        {
+//          led.on();                              // Flash a light to show received good message
+//          motorStatus = motorStates::ROTATEDOWN;
+//          led.off();
+//        }
+//      }
      
       break;
       
@@ -68,13 +85,24 @@ void loop()
       }
       else if (vw_get_message(buf, &buflen)) // Non-blocking
       {
-        if(buf[0] == 'U' || (buf[0] == 'D' && CH5Val == 0))
+        if(buf[0] == 'D' && CH5Val == 0)
         {
           led.on();                              // Flash a light to show received good message
           motorStatus = motorStates::ROTATEUP;
           led.off();
         }
+        else if(buf[0] == 'U')
+        {
+          motor.brake();
+          delay(2000);
+        }
       }
+//      if(CH5Val == 0)
+//      {
+//        led.on();                              // Flash a light to show received good message
+//        motorStatus = motorStates::ROTATEUP;
+//        led.off();
+//      }
       
       break;
 
@@ -87,22 +115,29 @@ void loop()
         prevStatus = motorStates::ROTATEUP;
         motorStatus = motorStates::STOP;
       }
-      else if (limitSwitchObj.limitSwitchRead() == 0)
+//      else if (limitSwitchObj.limitSwitchRead() == 0)
+//      {
+//          led.on();                              // Flash a light to show received good message
+//          prevStatus = motorStates::PASS;
+//          motorStatus = motorStates::STOP;
+//          led.off();
+//      }
+
+//      else if (vw_get_message(buf, &buflen)) // Non-blocking
+//      {
+//        if(buf[0] == 'D' && CH5Val == 1)
+//        {
+//          led.on();                              // Flash a light to show received good message
+//          motorStatus = motorStates::ROTATEDOWN;
+//          led.off();
+//        }
+//      }      
+      else if(CH5Val == 1)
       {
-          led.on();                              // Flash a light to show received good message
-          prevStatus = motorStates::PASS;
-          motorStatus = motorStates::STOP;
-          led.off();
-      }
-      else if (vw_get_message(buf, &buflen)) // Non-blocking
-      {
-        if(buf[0] == 'D' && CH5Val == 1)
-        {
-          led.on();                              // Flash a light to show received good message
-          motorStatus = motorStates::ROTATEDOWN;
-          led.off();
-        }
-      }      
+        led.on();                              // Flash a light to show received good message
+        motorStatus = motorStates::ROTATEDOWN;
+        led.off();
+      }     
       break;
 
       case motorStates::STOP:
@@ -122,16 +157,61 @@ void loop()
 //void incrementEncoder()
 //{
 //  //Increment value for each pulse of the encoder
-//  ++encoderValue;
+//  if(digitalRead(ch1.pinA) != digitalRead(ch1.pinB))
+//  {
+//    encoderCounter++;
+//  }
+//  else
+//  {
+//    encoderCounter--;
+//  }
 //}
 //
 //void decrementEncoder()
 //{
 //  //Decrement value for each pulse of the encoder 
-//  --encoderValue;
-//  if(encoderValue <= 0)
+//  if(digitalRead(ch1.pinA) == digitalRead(ch1.pinB))
 //  {
-//    prevStatus = motorStates::PASS;
-//    motorStatus = motorStates::STOP;
+//    encoderCounter++;
+//  }
+//  else
+//  {
+//    encoderCounter--;
 //  }
 //}
+
+void encoderInterrupt() 
+{
+  if (digitalRead(ch1.pinA) == LOW)
+  { 
+    if (digitalRead(ch1.pinB) == LOW)
+    {
+     encoderCount--;
+     if(encoderCount <= 3000)
+      {
+        prevStatus = motorStates::PASS;
+        motorStatus = motorStates::STOP;
+      }
+    }
+    else 
+    {
+      encoderCount++;
+    }
+  }
+  else 
+  {
+    if (digitalRead(ch1.pinB) == LOW) 
+    {
+      encoderCount++;
+    }
+    else 
+    {
+      encoderCount--;
+      if(encoderCount <= 500)
+      {
+        prevStatus = motorStates::PASS;
+        motorStatus = motorStates::STOP;
+      }
+    }
+  }
+}

@@ -3,7 +3,7 @@
 #include "encoder.h"
 #include "FlySkyIBus.h"
 #include "led.h"
-#include "limitSwitch.h"
+//#include "limitSwitch.h"
 #include "buzzer.h"
 
 //virtual Wire pins
@@ -28,25 +28,25 @@ constexpr byte PWM = 5;
 tb6612fng motor(IN1,IN2,PWM,STDBY);
 
 //Encoder switches
-//constexpr byte pinA = 3;
-//constexpr byte pinB = 2;
-//volatile long encoderValue=0;
+constexpr byte pinA = 3;
+constexpr byte pinB = 2;
 
 //Encoder object
-//Encoder encoder(pinA);
-
+Encoder ch1(pinA, pinB);
+unsigned long encoderCount = 0;
+//long motorRpm = 0;
 
 //Transmitter channel read and object
 uint8_t CH5Val;
-uint16_t CH6Speed;
+//uint16_t CH6Speed;
 uint8_t CH7Kill;
 
 //FlySky
 FlySkyIBus IBus;
 
 //LimitSwitch and object
-constexpr uint8_t limitSwitchPin = 7;
-limitSwitch limitSwitchObj(limitSwitchPin);
+//constexpr uint8_t limitSwitchPin = 7;
+//limitSwitch limitSwitchObj(limitSwitchPin);
 
 //Buzzer
 constexpr uint8_t buzzPin = 10;

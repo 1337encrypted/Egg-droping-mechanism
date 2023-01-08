@@ -28,8 +28,8 @@ void setup()
     //Attiny85
     //INT 0 = PB2 || Pin7(hardware)
     attachInterrupt(digitalPinToInterrupt(buttonPin), isr, CHANGE);
-    led.on();
     buzz.initBuzzer();
+    led.on();
     led.off();
 }
 

@@ -34,7 +34,7 @@ class tb6612fng
     void begin();
     
     public:
-    volatile uint8_t speed;
+    uint8_t speed;
 
     tb6612fng(uint8_t, uint8_t, uint8_t, uint8_t); // Default values set to -1
     inline void enable() __attribute__((always_inline));                       //The enable function takes it out of standby
